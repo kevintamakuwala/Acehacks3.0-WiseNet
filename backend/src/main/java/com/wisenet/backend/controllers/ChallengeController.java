@@ -18,6 +18,7 @@ public class ChallengeController {
     @Autowired
     private ChallengeService challengeService;
     @PostMapping("")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<?> addChallenge(@RequestBody ChallengeRequest challengeRequest)
     {
         try{

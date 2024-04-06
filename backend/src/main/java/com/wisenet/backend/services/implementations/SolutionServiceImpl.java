@@ -55,10 +55,13 @@ public class SolutionServiceImpl implements SolutionService {
         solution.setPostedAt(LocalDateTime.now());
         solution.setPdfLink(solutionRequest.getPdfLink());
 
-        User user = userRepository.findById(userId).orElseThrow();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+
+//        User user = userRepository.findById(userId).orElseThrow();
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow();
 
-        solution.setUser(user);
+        solution.setUser(currentUser);
         solution.setChallenge(challenge);
         solution = solutionRepository.save(solution);
 
