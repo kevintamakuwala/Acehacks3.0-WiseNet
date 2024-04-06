@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .map(AntPathRequestMatcher::new)
                 .collect(Collectors.toList());
         requestMatchers.add(new AntPathRequestMatcher("/auth/**"));
+        requestMatchers.add(new AntPathRequestMatcher("/tags", "GET"));
         // requestMatchers.add(new AntPathRequestMatcher("/tags/**", "GET"));
 
         http.csrf(csrf -> csrf
