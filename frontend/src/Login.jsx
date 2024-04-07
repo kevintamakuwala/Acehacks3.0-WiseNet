@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import logo from "/images/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,9 +27,9 @@ function Login() {
         email: username,
         password: password,
       });
-      localStorage.setItem("jwt", response?.data?.jwt);
+      localStorage.setItem("token", response?.data?.jwt);
       console.log(response.data.roleName);
-      if (response.data.roleName =="ADMIN") navigate("/admin-home");
+      if (response.data.roleName ==="ADMIN") navigate("/admin-home");
       else if (response.data.roleName === "USER") navigate("/user-home");
 
     } catch (err) {

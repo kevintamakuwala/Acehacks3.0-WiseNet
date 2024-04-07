@@ -1,7 +1,7 @@
 import { Route, Navigate } from "react-router-dom";
 
 export const ProtectedRoute = ({ element, ...rest }) => {
-  const token = localStorage.getItem("jwt");
+  const token = localStorage.getItem("token");
   return token ? (
     <Route {...rest} element={element} />
   ) : (

@@ -21,7 +21,7 @@ function UserHome() {
         const res = await axios.get(url,
           { headers });
           
-        console.log("response:  ", res.data);
+         console.log("response:  ", res.data);
         setDatas(res.data);
       }
 
