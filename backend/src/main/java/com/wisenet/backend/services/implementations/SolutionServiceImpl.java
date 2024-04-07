@@ -214,6 +214,7 @@ public class SolutionServiceImpl implements SolutionService {
             solutionResponse.setUsername(user.getName());
             solutionResponse.setChallengeId(challenge.getChallengeId());
             solutionResponse.setChallengeTitle(challenge.getTitle());
+            solutionResponse.setPhotoUrl(user.getPhotoUrl());
         } else {
             throw new RuntimeException("User or Challenge not present");
         }
