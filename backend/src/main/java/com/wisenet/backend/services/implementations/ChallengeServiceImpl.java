@@ -8,6 +8,7 @@ import com.wisenet.backend.responses.ChallengeResponse;
 import com.wisenet.backend.responses.LikeResponse;
 import com.wisenet.backend.services.ChallengeService;
 
+import jakarta.transaction.Transactional;
 import lombok.NonNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ChallengeServiceImpl implements ChallengeService {
 
-    
     @Autowired
     private TagRepository tagRepository;
     @Autowired
@@ -41,7 +42,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     @SuppressWarnings("null")
     @Override
     public Challenge addChallenge(ChallengeRequest challengeRequest) {
-       return challengeRepository.save(challengeRequestToChallenge(challengeRequest));
+        return challengeRepository.save(challengeRequestToChallenge(challengeRequest));
 
     }
 
@@ -63,8 +64,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         synchronized (lock) {
 
             ChallengeLike challengeLike = challengeLikeRepository.findByChallengeAndUser(challenge, currentUser);
-            if(challengeLike != null)
-            {
+            if (challengeLike != null) {
                 return new LikeResponse(challenge.getLikesCount(), challengeId);
             }
 
@@ -74,9 +74,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
             challengeLikeRepository.save(challengeLike1);
 
-
-
-            challenge.setLikesCount((challenge.getLikesCount() == null?0:challenge.getLikesCount())+1);
+            challenge.setLikesCount((challenge.getLikesCount() == null ? 0 : challenge.getLikesCount()) + 1);
 
             challengeRepository.save(challenge);
         }
@@ -98,18 +96,13 @@ public class ChallengeServiceImpl implements ChallengeService {
         synchronized (lock) {
 
             ChallengeLike challengeLike = challengeLikeRepository.findByChallengeAndUser(challenge, currentUser);
-            if(challengeLike == null)
-            {
+            if (challengeLike == null) {
                 return new LikeResponse(challenge.getLikesCount(), challengeId);
             }
 
-
-
             challengeLikeRepository.delete(challengeLike);
 
-
-
-            challenge.setLikesCount((challenge.getLikesCount() == null?0:challenge.getLikesCount())-1);
+            challenge.setLikesCount((challenge.getLikesCount() == null ? 0 : challenge.getLikesCount()) - 1);
 
             challengeRepository.save(challenge);
         }
@@ -121,7 +114,6 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         return likeResponse;
     }
-
 
     private ChallengeResponse getChallengeResponse(Challenge challenge) {
         ChallengeResponse challengeResponse = new ChallengeResponse();
@@ -138,38 +130,32 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         ChallengeLike challengeLike = challengeLikeRepository.findByChallengeAndUser(challenge, currentUser);
 
-        if(challengeLike == null)
-        {
+        if (challengeLike == null) {
             challengeResponse.setLiked(false);
-        }
-        else {
+        } else {
             challengeResponse.setLiked(true);
         }
 
         return challengeResponse;
     }
 
-    private ChallengeCardResponse mapChallengeToChallengeCardResponse(Challenge challenge)
-    {
+    private ChallengeCardResponse mapChallengeToChallengeCardResponse(Challenge challenge) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
 
         ChallengeCardResponse challengeCardResponse = new ChallengeCardResponse();
-
-
 
         challengeCardResponse.setChallengeId(challenge.getChallengeId());
         challengeCardResponse.setChallengeTitle(challenge.getTitle());
         challengeCardResponse.setLikeCount(challenge.getLikesCount());
         challengeCardResponse.setUrlLink(challenge.getImageUrl());
         challengeCardResponse.setSolutionCount(challenge.getSolutions().stream().count());
-        challengeCardResponse.setTags(challenge.getChallengeTags().stream().map(user ->{
+        challengeCardResponse.setTags(challenge.getChallengeTags().stream().map(user -> {
             return user.getTag().getName();
         }).collect(Collectors.toList()));
 
-        challengeCardResponse.setCertifiedSolutionCount(challenge.getSolutions().stream().filter(user->{
-            if(user.getCertificateLink() != null && !user.getCertificateLink().equals(""))
-            {
+        challengeCardResponse.setCertifiedSolutionCount(challenge.getSolutions().stream().filter(user -> {
+            if (user.getCertificateLink() != null && !user.getCertificateLink().equals("")) {
                 return true;
             }
             return false;
@@ -179,9 +165,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         return challengeCardResponse;
     }
-    private Challenge challengeRequestToChallenge(ChallengeRequest challengeRequest)
-    {
-        Challenge challenge= new Challenge();
+
+    private Challenge challengeRequestToChallenge(ChallengeRequest challengeRequest) {
+        Challenge challenge = new Challenge();
 
         challenge.setAuthor(challengeRequest.getAuthor());
         challenge.setDescription(challengeRequest.getDescription());
@@ -197,22 +183,16 @@ public class ChallengeServiceImpl implements ChallengeService {
         return c;
     }
 
+    private void tagList(List<String> tags, Challenge challenge) {
 
-
-    private void tagList(List<String> tags, Challenge challenge)
-    {
-
-        for(String tag: tags)
-        {
+        for (String tag : tags) {
             Optional<Tag> t = tagRepository.findByName(tag);
-            if(t.isPresent())
-            {
+            if (t.isPresent()) {
                 ChallengeTag challengeTag = new ChallengeTag();
                 challengeTag.setChallenge(challenge);
                 challengeTag.setTag(t.get());
                 challengeTagRepository.save(challengeTag);
-            }
-            else {
+            } else {
                 Tag tag1 = new Tag();
                 tag1.setName(tag);
                 tag1 = tagRepository.save(tag1);
@@ -222,5 +202,25 @@ public class ChallengeServiceImpl implements ChallengeService {
                 challengeTagRepository.save(challengeTag);
             }
         }
+    }
+
+    @Override
+    public List<ChallengeResponse> getAllChallenges() {
+        List<Challenge> challenges = challengeRepository.findAll();
+        List<ChallengeResponse> challengeResponses = new ArrayList<>();
+        for (Challenge challenge : challenges) {
+            challengeResponses.add(getChallengeResponse(challenge));
+        }
+        return challengeResponses;
+    }
+
+    @Override
+    public List<ChallengeResponse> getFilteredChallengesFromTag(String tag) {
+        List<ChallengeTag> challengeTags = challengeTagRepository.findByTag(tag);
+        List<ChallengeResponse> challengeResponses = new ArrayList<>();
+        for (ChallengeTag challengeTag : challengeTags) {
+            challengeResponses.add(getChallengeResponse(challengeTag.getChallenge()));
+        }
+        return challengeResponses;
     }
 }

@@ -42,6 +42,5 @@ public class SolutionResponse {
     private List<CommentResponse> comments = new ArrayList<>();
 
     private String certificateLink;
-    private String photoUrl;
 
 }

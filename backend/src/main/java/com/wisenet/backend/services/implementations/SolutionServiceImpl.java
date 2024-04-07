@@ -55,10 +55,11 @@ public class SolutionServiceImpl implements SolutionService {
         solution.setPostedAt(LocalDateTime.now());
         solution.setPdfLink(solutionRequest.getPdfLink());
 
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
 
-//        User user = userRepository.findById(userId).orElseThrow();
+        //User user = userRepository.findById(userId).orElseThrow();
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow();
 
         solution.setUser(currentUser);
@@ -73,6 +74,9 @@ public class SolutionServiceImpl implements SolutionService {
 
         Sort sort = Sort.by("postedAt").descending();
         Pageable page = PageRequest.of(pageNumber, pageSize, sort);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
 
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow();
 
@@ -94,6 +98,17 @@ public class SolutionServiceImpl implements SolutionService {
             solutionCard.setChallengeId(solution.getSolutionId());
             solutionCard.setChallengeTitle(solution.getChallenge().getTitle());
             solutionCard.setPhotoLink(solution.getUser().getPhotoUrl());
+
+            SolutionLike solutionLike  = solutionLikeRepository.findBySolutionAndUser(solution, currentUser);
+
+            if(solutionLike == null)
+            {
+                solutionCard.setIsLiked(false);
+            }
+            else {
+                solutionCard.setIsLiked(true);
+            }
+
 
             solutionList.add(solutionCard);
         }
@@ -214,7 +229,6 @@ public class SolutionServiceImpl implements SolutionService {
             solutionResponse.setUsername(user.getName());
             solutionResponse.setChallengeId(challenge.getChallengeId());
             solutionResponse.setChallengeTitle(challenge.getTitle());
-            solutionResponse.setPhotoUrl(user.getPhotoUrl());
         } else {
             throw new RuntimeException("User or Challenge not present");
         }

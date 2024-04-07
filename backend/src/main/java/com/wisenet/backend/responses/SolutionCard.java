@@ -19,4 +19,5 @@ public class SolutionCard {
     private Long likesCount = 0l;
     private String certificateLink = null;
     private Long commentsCount = 0l;
+    private Boolean isLiked = false;
 }

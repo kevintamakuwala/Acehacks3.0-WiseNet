@@ -10,8 +10,6 @@ import com.wisenet.backend.requests.CommentRequest;
 import com.wisenet.backend.responses.CommentResponse;
 import com.wisenet.backend.services.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,14 +30,12 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment();
         comment.setContent(commentRequest.getContent());
         comment.setPostedAt(LocalDateTime.now());
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
 
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         Solution solution = solutionRepository.findById(solutionId)
                 .orElseThrow(() -> new RuntimeException("Solution not found"));
 
-        comment.setUser(currentUser);
+        comment.setUser(user);
         comment.setSolution(solution);
 
         if (commentId != -1) {
